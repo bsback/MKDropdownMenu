@@ -73,6 +73,7 @@ static UIImage * MKDropdownMenuDisclosureIndicatorImage() {
 @interface MKDropdownMenuComponentButton : UIButton
 @property (readonly, nonatomic) UIImageView *disclosureIndicatorView;
 @property (readonly, nonatomic) UIView *containerView;
+@property (readonly, nonatomic) UILabel *label;
 @property (readonly, nonatomic) UIView *currentCustomView;
 @property (assign, nonatomic) NSTextAlignment textAlignment;
 @property (strong, nonatomic) UIColor *selectedBackgroundColor;
@@ -114,13 +115,7 @@ static UIImage *disclosureIndicatorImage = nil;
     _disclosureIndicatorView = [UIImageView new];
     _disclosureIndicatorView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_disclosureIndicatorView];
-    [self addConstraints:@[[NSLayoutConstraint constraintWithItem:self
-                                                        attribute:NSLayoutAttributeTrailing
-                                                        relatedBy:NSLayoutRelationEqual
-                                                           toItem:_disclosureIndicatorView
-                                                        attribute:NSLayoutAttributeTrailing
-                                                       multiplier:1.0
-                                                         constant:8],
+    [self addConstraints:@[
                            [NSLayoutConstraint constraintWithItem:_disclosureIndicatorView
                                                         attribute:NSLayoutAttributeCenterY
                                                         relatedBy:NSLayoutRelationEqual
@@ -128,6 +123,33 @@ static UIImage *disclosureIndicatorImage = nil;
                                                         attribute:NSLayoutAttributeCenterY
                                                        multiplier:1.0
                                                          constant:0.0]]];
+    
+    _label = [UILabel new];
+    _label.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addConstraints:@[
+                           [NSLayoutConstraint constraintWithItem:_label
+                                                        attribute:NSLayoutAttributeCenterY
+                                                        relatedBy:NSLayoutRelationEqual
+                                                           toItem:self
+                                                        attribute:NSLayoutAttributeCenterY
+                                                       multiplier:1.0
+                                                         constant:0.0]]];
+    [self addSubview:_label];
+    
+    UIView *spacer1 = [[UIView alloc] init];
+    spacer1.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:spacer1];
+    
+    UIView *spacer2 = [[UIView alloc] init];
+    spacer2.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:spacer2];
+    
+    NSDictionary *views = NSDictionaryOfVariableBindings(spacer1, spacer2, _label, _disclosureIndicatorView);
+    
+    NSArray *constraintsArray = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[spacer1(>=0)][_label]-4-[_disclosureIndicatorView][spacer2(==spacer1)]|" options:0 metrics:nil views:views];
+    for (int i = 0; i < constraintsArray.count; i++) {
+        [self addConstraint:constraintsArray[i]];
+    }
 }
 
 - (UIView *)currentCustomView {
@@ -147,9 +169,13 @@ static UIImage *disclosureIndicatorImage = nil;
 }
 
 - (void)setAttributedTitle:(NSAttributedString *)title selectedTitle:(NSAttributedString *)selectedTitle {
-    [self setAttributedTitle:title forState:UIControlStateNormal];
-    [self setAttributedTitle:selectedTitle forState:UIControlStateSelected];
-    [self setAttributedTitle:selectedTitle forState:UIControlStateSelected|UIControlStateHighlighted];
+//    [self setAttributedTitle:title forState:UIControlStateNormal];
+//    [self setAttributedTitle:selectedTitle forState:UIControlStateSelected];
+//    [self setAttributedTitle:selectedTitle forState:UIControlStateSelected|UIControlStateHighlighted];
+    
+    _label.attributedText = title;
+    [_label sizeToFit];
+    
     if (title != nil) {
         [self.currentCustomView removeFromSuperview];
         self.containerView.hidden = YES;
